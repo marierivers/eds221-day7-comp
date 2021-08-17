@@ -1,0 +1,83 @@
+---
+title: "joins"
+author: "Marie Rivers"
+date: "8/17/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(palmerpenguins)
+library(lubridate)
+```
+
+# Part 1: Data wrangling refresher
+Refresher 1:
+```{r}
+biscoe_dream <- penguins %>% 
+  filter(island %in% c("Biscoe", "Dream")) %>% 
+  select(-year, -sex) %>% 
+  mutate(body_mass_kg = body_mass_g / 1000) %>% 
+  rename(location = island)
+```
+Refresher 2:
+```{r}
+adelie <- penguins %>% 
+  filter(species == "Adelie") %>% 
+  drop_na(flipper_length_mm) %>% 
+  group_by(sex) %>% 
+  summarize(mean_flipper = mean(flipper_length_mm),
+            sd_flipper = sd(flipper_length_mm),
+            sample_size = n())
+  
+# n() looks within groups and counts how many there are so you dont need to give is an argument inside the parenthesis 
+```
+
+```{r}
+# Addins, paste as tribble, then assign it a name that it will be stored as
+animals <- tibble::tribble(
+  ~location,   ~species,  ~maturity,
+   "lagoon",   "bobcat",    "adult",
+    "bluff",   "coyote", "juvenile",
+    "creek",      "fox",    "adult",
+     "oaks", "squirrel", "juvenile",
+    "bluff",   "bobcat",    "adult"
+  )
+
+sites <- tibble::tribble(
+  ~location,      ~full_site_name, ~jurisdiction,
+    "beach",       "Goleta Beach",     "SB City",
+   "lagoon",        "UCSB Lagoon",        "UCSB",
+    "bluff",       "Ellwood Mesa",     "SB City",
+     "oaks", "Fremont Campground",        "USFS"
+  )
+```
+### fill join
+```{r}
+animals_full_join <- full_join(animals, sites, by = "location")
+```
+### Left join
+```{r}
+animals_left_join <- left_join(animals, sites, by = "location")
+```
+### Inner join
+```{r}
+animals_inner_join <- inner_join(animals, sites, by = "location")
+```
+## Filtering joins
+```{r}
+animals_semi_join <- semi_join(animals, sites, by = "location")
+```
+## Anti join
+```{r}
+animals_anti_join <- anti_join(animals, sites, by = "location")
+animals_anti_join_2 <- anti_join(sites, animals, by = "location")
+```
+## join pipe
+```{r}
+join_pipe <- animals %>% 
+  full_join(sites) %>% 
+  inner_join(animals_anti_join)
+```
+
