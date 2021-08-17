@@ -1,0 +1,104 @@
+---
+title: "working with dates and times"
+author: "Marie Rivers"
+date: "8/17/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(lubridate)
+```
+
+## Play around with functions in `lubridate`
+```{r}
+my_date <- "03-15-1998"
+class(my_date)
+```
+
+ymd, mdy, dmy
+
+Tell lubridate the formate of your existing date! 
+```{r}
+my_date_new <- mdy(my_date)
+class(my_date_new)
+```
+## Try converting the following to dates:
+
+- 4/6/2005 (month, day, year)
+- 20100806 (year, month, day)
+- 12-Jun-1974
+- your birthday
+
+```{r}
+date_1 <- "4/6/2005"
+date_1_new <- mdy(date_1)
+
+date_2 <- "20100806"
+date_2_new <- ymd(date_2)
+
+date_3 <- lubridate::dmy("12-Jan-1974")
+date_4 <- lubridate::mdy("March 5th, 1987")
+```
+
+```{r}
+date_vec <- c("3/5/1987", "08-26-2019", "02181985")
+date_vec_new <- mdy(date_vec)
+# vectors work if things are in different formates as long as the month, day and year are in the same order!
+date_vec_new
+```
+
+```{r}
+# example that doesn't work
+lubridate::mdy("20-03-2004")
+```
+## Times
+```{r}
+time <- "2020-08-12 11:18"
+ex_5 <- lubridate::ymd_hm(time)
+ex_5
+# assumes it's on a 24 hour clock
+class(ex_5)
+```
+Including time zones
+```{r}
+time_la <- with_tz(ex_5, "America/Los_Angeles")
+time_la
+```
+
+```{r}
+# create a date time and convert it to time in Sydney Australia
+date_time_1 <- "2020-01-01 04:45"
+date_time_1_syd <- with_tz(date_time_1, "Australia/Sydney")
+date_time_1_syd
+```
+```{r}
+# use lubridate fuctions to pull things out
+lubridate::week(date_time_1_syd)
+lubridate::day(date_time_1_syd)
+minute(date_time_1_syd)
+seconds(date_time_1_syd)
+
+# use `mutate` to add a colummn with parts of a date
+```
+
+```{r}
+my_bday <- lubridate::ymd("1987-03-05")
+wday(my_bday, label = TRUE)
+```
+```{r}
+urchin_counts <- tribble(
+  ~date, ~species, ~size_mm,
+  "10-3-2020", "purple", 55,
+  "10/4/2020", "red", 48,
+  "11/17/2020", "red", 67
+)
+urchin_counts_ymd <- urchin_counts %>% 
+  mutate(date = lubridate::mdy(date)) %>% # overriding original date column
+  mutate(year = year(date)) %>% 
+  mutate(month = month(date))
+
+# now you can `group_by` month
+```
+
